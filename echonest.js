@@ -43,6 +43,7 @@ var request = function(options, callback) {
       headers = options.headers || {},
       params = options.body;
 
+  Cu.reportError(method);
   params.api_key = echonest.api_key;
 
   xhr.onreadystatechange = function() {
@@ -52,7 +53,7 @@ var request = function(options, callback) {
   };
 
   // Async all day, baby
-  xhr.open(options.method, options.uri, true);
+  xhr.open(method, options.uri, true);
 
   for (var header in headers) {
     xhr.setRequestHeader(header, headers[header]);
@@ -70,6 +71,8 @@ var echonest = (function() {
                           'Content-Type': 'application/x-www-form-urlencoded',
                           'Connection': 'close'
                         }
+                      },
+                      profile: {
                       }
                     }
                   },
@@ -89,15 +92,22 @@ var echonest = (function() {
             mtype = (rtype) ? rtype[method] : null,
             op = (mtype) ? mtype['method'] : null,
             body = queryString.stringify(flags),
-            headers = (mtype) ? mtype['headers'] : null;
+            headers = (mtype) ? mtype['headers'] : null,
+            params = {};
 
-        if (!op) {
+        if (!mtype) {
           // console.log('The ' + method ' method is unavailable.');
           return;
         }
 
+        if (!op || op === 'GET') {
+          params = flags;
+        }
+
+        params['api_key'] = this.api_key;
+
         request({ method: op,
-                  uri: getEchonestUri(path, { api_key: this.api_key }),
+                  uri: getEchonestUri(path, params),
                   body: body,
                   headers: headers
                 }, callback);
