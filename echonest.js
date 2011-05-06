@@ -134,3 +134,8 @@ var echonest = (function() {
     }
   };
 })();
+
+/* Node JS magic */
+if (module) {
+  module.exports = echonest;
+}
