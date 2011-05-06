@@ -1,0 +1,19 @@
+{
+  "name": "echonest",
+  "description": "Echo Nest API wrapper",
+  "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/kruppel/echonestjs.git"
+  },
+  "author": "kurt <kurt@songbirdnest.com>",
+  "directories": {
+    "lib": "."
+  },
+  "engines": {
+    "node": ">=0.4.0"
+  },
+  "dependencies": {
+    "request": ">=0.10.0",
+  }
+}

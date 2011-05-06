@@ -7,10 +7,14 @@
 
 /**
  * NOTES
- * - Only tested within Songbird
+ * - client-side: will not work in IE
  */
 
-var queryString = {
+// naive approach to assessing node.js compat
+var ss = (typeof(require) === 'function' &&
+          typeof(module) === 'object');
+
+var queryString = (ss) ? require('querystring') : {
   /* Parses a querystring into an object */
   parse: function(qs) {
     var params = qs.split('&'),
@@ -37,7 +41,7 @@ var queryString = {
   }
 };
 
-var request = function(options, callback) {
+var request = (ss) ? require('request') : function(options, callback) {
   var xhr = new XMLHttpRequest(),
       method = options.method || 'GET',
       headers = options.headers || {},
@@ -135,7 +139,7 @@ var echonest = (function() {
   };
 })();
 
-/* Node JS magic */
-if (module) {
+/* node.js magic */
+if (ss) {
   module.exports = echonest;
 }
