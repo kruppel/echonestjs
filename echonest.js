@@ -65,7 +65,13 @@ var request = (ss) ? require('request') : function(options, callback) {
 
 var echonest = (function() {
   var base_url = 'http://developer.echonest.com/api/v4/',
-      resources = { catalog: {
+      resources = { artist: {
+                      profile: {
+                      },
+                      similar: {
+                      }
+                    },
+                    catalog: {
                       create: {
                         method: 'POST',
                         headers: {
