@@ -49,7 +49,7 @@ var request = (ss) ? require('request') : function(options, callback) {
 
   xhr.onreadystatechange = function() {
     if (this.readyState === 4) {
-      callback(xhr.responseText);
+      callback(null, xhr, xhr.responseText);
     }
   };
 
