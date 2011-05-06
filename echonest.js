@@ -14,7 +14,7 @@
 var ss = (typeof(require) === 'function' &&
           typeof(module) === 'object');
 
-var queryString = (ss) ? require('querystring') : {
+var querystring = (ss) ? require('querystring') : {
   /* Parses a querystring into an object */
   parse: function(qs) {
     var params = qs.split('&'),
@@ -95,8 +95,27 @@ var echonest = (function() {
                   },
 
       getEchonestUri = function(path, params) {
-        var qs = queryString.stringify(params),
-            uri = base_url + path + '?' + qs;
+        var buckets = params['buckets'],
+            bucketed, qs, uri;
+
+        // Have to special case for buckets because node-querystring
+        // doesn't allow duplicate params.
+        if (buckets) {
+          var barray = [];
+          buckets.forEach(function(bucket) {
+            barray.push('bucket=' + bucket);
+          });
+
+          bucketed = barray.join('&');
+          delete params['buckets'];
+        }
+
+        qs = querystring.stringify(params);
+        uri = base_url + path + '?' + qs;
+
+        if (bucketed) {
+          uri += '&' + bucketed;
+        }
 
         return uri;
       };
@@ -111,10 +130,14 @@ var echonest = (function() {
           mtype = (rtype) ? rtype[method] : null,
           op = (mtype) ? mtype['method'] : null,
           data = flags['data'],
-          required = (mtype) ? mtype['required'] : null;
+          required = (mtype) ? mtype['required'] : null,
+          body;
+
+      body = querystring.stringify(flags);
 
       options['method'] = op;
-      options['body'] = queryString.stringify(flags);
+      options['body'] = body;
+      console.log(options['body']);
       options['headers'] = (mtype) ? mtype['headers'] : null;
 
       if (data) {
