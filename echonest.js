@@ -137,7 +137,6 @@ var echonest = (function() {
 
       options['method'] = op;
       options['body'] = body;
-      console.log(options['body']);
       options['headers'] = (mtype) ? mtype['headers'] : null;
 
       if (data) {
