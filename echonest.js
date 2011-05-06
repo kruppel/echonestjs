@@ -43,9 +43,6 @@ var request = function(options, callback) {
       headers = options.headers || {},
       params = options.body;
 
-  Cu.reportError(method);
-  params.api_key = echonest.api_key;
-
   xhr.onreadystatechange = function() {
     if (this.readyState === 4) {
       callback(xhr.responseText);
@@ -68,11 +65,21 @@ var echonest = (function() {
                       create: {
                         method: 'POST',
                         headers: {
-                          'Content-Type': 'application/x-www-form-urlencoded',
-                          'Connection': 'close'
+                          'content-type': 'application/x-www-form-urlencoded',
+                          'connection': 'close'
                         }
                       },
+                      update: {
+                        method: 'POST',
+                        headers: {
+                          'content-type': 'application/x-www-form-urlencoded',
+                          'connection': 'close'
+                        },
+                        required: [ 'id' ]
+                      },
                       profile: {
+                      },
+                      feed: {
                       }
                     }
                   },
@@ -87,30 +94,43 @@ var echonest = (function() {
   return {
     api_key: null,
     apiCall: function(resource, method, flags, callback) {
-        var path = resource + '/' + method,
-            rtype = resources[resource],
-            mtype = (rtype) ? rtype[method] : null,
-            op = (mtype) ? mtype['method'] : null,
-            body = queryString.stringify(flags),
-            headers = (mtype) ? mtype['headers'] : null,
-            params = {};
+      var path = resource + '/' + method,
+          params = {},
+          options = {},
+          rtype = resources[resource],
+          mtype = (rtype) ? rtype[method] : null,
+          op = (mtype) ? mtype['method'] : null,
+          data = flags['data'],
+          required = (mtype) ? mtype['required'] : null;
 
-        if (!mtype) {
-          // console.log('The ' + method ' method is unavailable.');
-          return;
-        }
+      options['method'] = op;
+      options['body'] = queryString.stringify(flags);
+      options['headers'] = (mtype) ? mtype['headers'] : null;
 
-        if (!op || op === 'GET') {
-          params = flags;
-        }
-
-        params['api_key'] = this.api_key;
-
-        request({ method: op,
-                  uri: getEchonestUri(path, params),
-                  body: body,
-                  headers: headers
-                }, callback);
+      if (data) {
+        options['body'] = 'data=' + data;
+        delete flags['data'];
       }
+
+      if (!mtype) {
+        // console.log('The ' + method ' method is unavailable.');
+        return;
+      }
+
+      if (!op || op === 'GET') {
+        params = flags;
+      }
+
+      if (required) {
+        required.forEach(function(req) {
+          params[req] = flags[req];
+        });
+      }
+
+      params['api_key'] = this.api_key;
+      options['uri'] = getEchonestUri(path, params);
+
+      request(options, callback);
+    }
   };
 })();
